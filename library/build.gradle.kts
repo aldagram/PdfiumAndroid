@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    `maven-publish`
 }
 
 android {
@@ -45,4 +46,18 @@ android {
 
 dependencies {
     implementation(libs.androidx.core)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                groupId = "com.aldagram"
+                artifactId = "PdfiumAndroid"
+                version = "2.0.0"
+
+                from(components["release"])
+            }
+        }
+    }
 }
