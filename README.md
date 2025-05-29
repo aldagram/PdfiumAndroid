@@ -1,3 +1,31 @@
+# WARNING!
+This fork was made in order to support for 16KB page size. Add-ons and updates probably will not appear.
+
+[![](https://jitpack.io/v/aldagram/PdfiumAndroid.svg)](https://jitpack.io/#aldagram/PdfiumAndroid)
+
+Uses pdfium library from [here](https://github.com/bblanchon/pdfium-binaries/releases/tag/chromium%2F7202).
+
+Add it in your root settings.gradle.kts at the end of repositories:
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+```
+
+Add the dependency
+```kotlin
+dependencies {
+    implementation("com.github.aldagram:PdfiumAndroid:Tag")
+}
+```
+
+---
+### Original description
+
 # Pdfium Android binding with Bitmap rendering
 Uses pdfium library [from AOSP](https://android.googlesource.com/platform/external/pdfium/)
 
