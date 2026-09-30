@@ -16,6 +16,7 @@ using namespace android;
 
 #include <fpdfview.h>
 #include <fpdf_doc.h>
+#include <fpdf_annot.h>
 #include <string>
 #include <vector>
 
@@ -283,6 +284,48 @@ JNI_FUNC(void, PdfiumCore, nativeCloseDocument)(JNI_ARGS, jlong documentPtr){
     delete doc;
 }
 
+// Every FPDF_ANNOT render rebuilds CPDF_AnnotList, which creates a Popup annotation for each
+// markup annotation with /Contents. Its generated appearance is added to the document as
+// indirect objects, so memory grows on every render until the document is closed.
+// Clearing /Contents in memory stops this. Popups are never drawn here, and only FreeText and
+// Popup appearances use /Contents, so rendering is unchanged. The PDF file is never saved.
+static bool isPopupCreatingAnnotSubtype(FPDF_ANNOTATION_SUBTYPE subtype){
+    switch(subtype){
+        case FPDF_ANNOT_TEXT:
+        case FPDF_ANNOT_LINE:
+        case FPDF_ANNOT_SQUARE:
+        case FPDF_ANNOT_CIRCLE:
+        case FPDF_ANNOT_POLYGON:
+        case FPDF_ANNOT_POLYLINE:
+        case FPDF_ANNOT_HIGHLIGHT:
+        case FPDF_ANNOT_UNDERLINE:
+        case FPDF_ANNOT_SQUIGGLY:
+        case FPDF_ANNOT_STRIKEOUT:
+        case FPDF_ANNOT_STAMP:
+        case FPDF_ANNOT_CARET:
+        case FPDF_ANNOT_INK:
+        case FPDF_ANNOT_FILEATTACHMENT:
+        case FPDF_ANNOT_REDACT:
+            return true;
+        default:
+            return false;
+    }
+}
+
+static void clearPopupCreatingAnnotContents(FPDF_PAGE page){
+    static const FPDF_WCHAR kEmpty[] = {0};
+    int count = FPDFPage_GetAnnotCount(page);
+    for(int i = 0; i < count; i++){
+        FPDF_ANNOTATION annot = FPDFPage_GetAnnot(page, i);
+        if(annot == NULL) continue;
+        if(isPopupCreatingAnnotSubtype(FPDFAnnot_GetSubtype(annot)) &&
+           FPDFAnnot_HasKey(annot, "Contents")){
+            FPDFAnnot_SetStringValue(annot, "Contents", kEmpty);
+        }
+        FPDFPage_CloseAnnot(annot);
+    }
+}
+
 static jlong loadPageInternal(JNIEnv *env, DocumentFile *doc, int pageIndex){
     try{
         if(doc == NULL) throw "Get page document null";
@@ -293,6 +336,7 @@ static jlong loadPageInternal(JNIEnv *env, DocumentFile *doc, int pageIndex){
             if (page == NULL) {
                 throw "Loaded page is null";
             }
+            clearPopupCreatingAnnotContents(page);
             return reinterpret_cast<jlong>(page);
         }else{
             throw "Get page pdf document null";
@@ -423,6 +467,8 @@ static void renderPageInternal( FPDF_PAGE page,
                            startX, startY,
                            drawSizeHor, drawSizeVer,
                            0, flags );
+
+    FPDFBitmap_Destroy(pdfBitmap);
 }
 
 JNI_FUNC(void, PdfiumCore, nativeRenderPage)(JNI_ARGS, jlong pagePtr, jobject objSurface,
@@ -547,6 +593,11 @@ JNI_FUNC(void, PdfiumCore, nativeRenderPageBitmap)(JNI_ARGS, jlong pagePtr, jobj
 
     if (info.format == ANDROID_BITMAP_FORMAT_RGB_565) {
         rgbBitmapTo565(tmp, sourceStride, addr, &info);
+    }
+
+    FPDFBitmap_Destroy(pdfBitmap);
+
+    if (info.format == ANDROID_BITMAP_FORMAT_RGB_565) {
         free(tmp);
     }
 
