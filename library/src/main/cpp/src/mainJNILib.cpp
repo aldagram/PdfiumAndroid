@@ -289,6 +289,8 @@ JNI_FUNC(void, PdfiumCore, nativeCloseDocument)(JNI_ARGS, jlong documentPtr){
 // indirect objects, so memory grows on every render until the document is closed.
 // Clearing /Contents in memory stops this. Popups are never drawn here, and only FreeText and
 // Popup appearances use /Contents, so rendering is unchanged. The PDF file is never saved.
+// Note: /Contents of these annotations is no longer available after loading a page, so keep
+// this in mind when adding an API that reads annotation text.
 static bool isPopupCreatingAnnotSubtype(FPDF_ANNOTATION_SUBTYPE subtype){
     switch(subtype){
         case FPDF_ANNOT_TEXT:
@@ -591,13 +593,10 @@ JNI_FUNC(void, PdfiumCore, nativeRenderPageBitmap)(JNI_ARGS, jlong pagePtr, jobj
                            (int)drawSizeHor, (int)drawSizeVer,
                            0, flags );
 
-    if (info.format == ANDROID_BITMAP_FORMAT_RGB_565) {
-        rgbBitmapTo565(tmp, sourceStride, addr, &info);
-    }
-
     FPDFBitmap_Destroy(pdfBitmap);
 
     if (info.format == ANDROID_BITMAP_FORMAT_RGB_565) {
+        rgbBitmapTo565(tmp, sourceStride, addr, &info);
         free(tmp);
     }
 
