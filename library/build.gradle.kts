@@ -9,7 +9,7 @@ android {
     ndkVersion = "27.1.12297006"
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
         buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
 
         externalNativeBuild {
