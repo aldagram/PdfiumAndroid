@@ -9,7 +9,7 @@ android {
     ndkVersion = "27.1.12297006"
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
         buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
 
         externalNativeBuild {
@@ -54,7 +54,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.aldagram"
                 artifactId = "PdfiumAndroid"
-                version = "2.0.1"
+                version = "2.0.2"
 
                 from(components["release"])
             }

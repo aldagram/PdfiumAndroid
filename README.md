@@ -3,7 +3,7 @@ This fork was made in order to support for 16KB page size. Add-ons and updates p
 
 [![](https://jitpack.io/v/aldagram/PdfiumAndroid.svg)](https://jitpack.io/#aldagram/PdfiumAndroid)
 
-Uses pdfium library from [here](https://github.com/bblanchon/pdfium-binaries/releases/tag/chromium%2F7202).
+Uses pdfium library from [here](https://github.com/bblanchon/pdfium-binaries/releases/tag/chromium%2F8138).
 
 Add it in your root settings.gradle.kts at the end of repositories:
 ```kotlin
