@@ -1,3 +1,6 @@
+## 2.0.2 (2026-11-05)
+* Updated Pdfium library to chromium/8138
+
 ## 1.9.0 (2018-06-29)
 * Updated Pdfium library to 7.1.2_r36
 * Changed `gnustl_static` to `c++_shared`

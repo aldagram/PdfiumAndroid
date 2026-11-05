@@ -54,7 +54,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.aldagram"
                 artifactId = "PdfiumAndroid"
-                version = "2.0.1"
+                version = "2.0.2"
 
                 from(components["release"])
             }
